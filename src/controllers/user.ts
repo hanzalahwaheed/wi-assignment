@@ -32,4 +32,20 @@ export class UserController {
       res.status(500).json({ error: "Error logging in" });
     }
   }
+
+  static async loginAsAdmin(req: Request, res: Response): Promise<void> {
+    try {
+      const { username, password } = req.body;
+      const token = await UserService.validateUser(username, password, true);
+
+      if (!token) {
+        res.status(401).json({ error: "Invalid admin credentials" });
+        return;
+      }
+
+      res.json({ token });
+    } catch (error) {
+      res.status(500).json({ error: "Error logging in as admin" });
+    }
+  }
 }

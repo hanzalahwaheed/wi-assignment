@@ -19,20 +19,33 @@ export class UserService {
 
   static async validateUser(
     username: string,
-    password: string
+    password: string,
+    requireAdmin: boolean = false
   ): Promise<string | null> {
-    const result = await pool.query("SELECT * FROM users WHERE username = $1", [
-      username,
-    ]);
+    // Build query based on role requirement
+    const query = requireAdmin
+      ? "SELECT * FROM users WHERE username = $1 AND role = 'admin'"
+      : "SELECT * FROM users WHERE username = $1";
+
+    const result = await pool.query(query, [username]);
     const user = result.rows[0];
 
-    if (!user || !(await bcrypt.compare(password, user.password))) {
+    if (!user) {
       return null;
+    }
+
+    const isValidPassword = await bcrypt.compare(password, user.password);
+    if (!isValidPassword) {
+      return null;
+    }
+
+    if (!process.env.JWT_SECRET) {
+      throw new Error("JWT_SECRET environment variable is not set");
     }
 
     return jwt.sign(
       { id: user.id, username: user.username, role: user.role },
-      process.env.JWT_SECRET || "your-secret-key",
+      process.env.JWT_SECRET,
       { expiresIn: "24h" }
     );
   }
