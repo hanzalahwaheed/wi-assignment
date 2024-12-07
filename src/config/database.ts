@@ -11,4 +11,14 @@ const pool = new Pool({
   port: parseInt(process.env.DB_PORT || "5432", 10),
 });
 
+// Add connection test
+pool
+  .connect()
+  .then(() => {
+    console.log("Database connected successfully");
+  })
+  .catch((err) => {
+    console.error("Database connection error:", err.message);
+  });
+
 export default pool;

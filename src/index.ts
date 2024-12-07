@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 import cors from "cors";
 import helmet from "helmet";
 import "dotenv/config";
+import userRoutes from "./routes/user";
 
 const app = express();
 
@@ -13,6 +14,8 @@ app.use(express.json());
 app.get("/", (_req: Request, res: Response) => {
   res.send("Hello World!");
 });
+
+app.use("/api/v0/users", userRoutes);
 
 const PORT = process.env.PORT || 3000;
 
